@@ -57,7 +57,7 @@ smmap==5.0.1
 sympy==1.12
 tensorboard==2.16.2
 tokenizers==0.15.2
-torch==2.2.1
+torch==2.7.1
 torchaudio==2.2.1
 torchvision==0.17.1
 tqdm==4.66.2
