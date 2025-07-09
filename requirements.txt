@@ -4,7 +4,7 @@ appdirs==1.4.4
 bitsandbytes==0.43.0
 clip @ git+https://github.com/openai/CLIP.git
 chamfer-distance @ git+https://github.com/otaheri/chamfer_distance@dc9987dcf70888d387d96893ba1fb9ba9a333992
-certifi==2024.2.2
+certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 datasets==2.18.0
