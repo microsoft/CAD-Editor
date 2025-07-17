@@ -2,15 +2,14 @@
 
 Official implementation of **[ICML 2025] CAD-Editor: A Locate-then-Infill Framework with Automated Training Data Synthesis for Text-Based CAD Editing** by *Yu Yuan, Shizhao Sun, Qi Liu, Jiang Bian*.
 
-📄 [Paper](https://arxiv.org/abs/2502.03997) | 🤗 [Model](https://huggingface.co/microsoft/CAD-Editor)
+📄 [Paper](https://arxiv.org/abs/2502.03997) | 🤗 [Model](https://huggingface.co/microsoft/CAD-Editor) ｜ 🏠 [Project Page](https://cad-editor.github.io)
 
 
 ## Installation
 
 ```bash
-conda create -n cad-editor python=3.11
+conda env create -f environment.yaml
 conda activate cad-editor
-pip install -r requirements.txt
 ```
 
 ## Data preparation
@@ -21,6 +20,7 @@ We also share the data processed by us under  `data/processed.zip`.
 ### 1. Paired CAD Generation
 
 **Step 1**: Generate design variations using hnc-cad.
+
 - Clone the [hnc-cad](https://github.com/samxuxiang/hnc-cad) repo.
 - Replace `gen/ac_gen.py` in the cloned hnc-cad repo with `hnc-cad/ac_gen.py` from this repo. Our updated version includes CAD model IDs (i.e., picture names) for pairing.
 - Follow the steps in the [hnc-cad](https://github.com/samxuxiang/hnc-cad) repo (especially `scripts/sample_cond.sh`) to generate design variations of a CAD model.
@@ -97,16 +97,17 @@ python data/filter_sequence.py --in_path data/dataset/train_all.json \
 **Step 1**: Create ground-truth masked CAD sequences:
 
 ```python
-python finetune/create_mask.py --input_path <original_train_data_path> \
-                               --output_path <train_data_path>.json
+# All training and inference are performed under the finetune folder:
+python create_mask.py --input_path <original_train_data_path> \
+                      --output_path <train_data_path>
 ```
 
 **Step 2**: Run locate training with multiple GPUs. Change `num_processes` in `ds_config.yaml` to specify how many GPUs will be used.
 
 ```python
-CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml finetune/llama_finetune.py --task_type mask \
-                           --run-name <run_name> \
-                           --data_path <train_data_path> \
+CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml llama_finetune.py --task_type mask \
+                           --run_name <run_name> \
+                           --data_folder <train_data_folder> \
                            --eval_freq 1000000 \
                            --save_freq 10000
 ```
@@ -117,19 +118,19 @@ CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml fi
 
 ```python
 CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml finetune/llama_finetune.py --task_type infill \
-                           --run-name <run_name> \
-                           --data_path <train_data_path> \
+                           --run_name <run_name> \
+                           --data_folder <train_data_folder> \
                            --eval_freq 1000000 \
                            --save_freq 10000
 ```
 
-**Step 2.** Enhanced training with selective data. Set `model_path` to the pretrained model from Step 1. Change `data-path` to your selective data. 
+**Step 2.** Enhanced training with selective data. Set `model_path` to the pretrained model from Step 1. Change `data_folder` to the folder of your selective data. 
 
 ```python
 CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml finetune/llama_finetune.py --task_type infill_selective \
-                           --run-name <run_name> \
+                           --run_name <run_name> \
                            --pretrained_model_path <model_path> \
-                           --data_path <selective_data_path> \
+                           --data_folder <selective_data_folder> \
                            --eval_freq 1000000 \
                            --save_freq 10000
 ```
@@ -139,27 +140,29 @@ CUDA_VISIBLE_DEVICES=<gpu_ids> accelerate launch --config_file ds_config.yaml fi
 Download our trained model checkpoints from [HuggingFace](https://huggingface.co/microsoft/CAD-Editor) to your ```<local_model_path>```.
 
 ### 1. Locating Stage
+
 Generate masked sequences. Set the `<model_path>` as `<local_model_path/locate_stage>`. Set the `<data_path>` as the path of `test.json` after unzip `data/processed.zip`.
 
 ```python
-CUDA_VISIBLE_DEVICES=<gpu_id> python finetune/llama_sample.py \
-                                              --task_type mask \
-                                              --model_path <model_path> \
-                                              --data_path <data_path> \
-                                              --out_path <out_path> \
-                                              --num_samples <num_samples>
+CUDA_VISIBLE_DEVICES=<gpu_id> python llama_sample.py \
+                                  --task_type mask \
+                                  --model_path <model_path> \
+                                  --data_path <data_path> \
+                                  --out_path <out_path> \
+                                  --num_samples <num_samples>
 ```
 
 ### 2. Infilling Stage
+
 Generate final edited CAD sequences. Set the `<model_path>` as `<local_model_path/infill_stage>`. Set the `<data_path>` the same as the `out_path` of the locating stage.
 
 ```python
-CUDA_VISIBLE_DEVICES=<gpu_id> python finetune/llama_sample.py \
-                                            --task_type infill \
-                                            --model_path <model_path> \
-                                            --data_path <data_path> \
-                                            --out_path <out_path> \
-                                            --num_samples <num_samples>
+CUDA_VISIBLE_DEVICES=<gpu_id> python llama_sample.py \
+                                  --task_type infill \
+                                  --model_path <model_path> \
+                                  --data_path <data_path> \
+                                  --out_path <out_path> \
+                                  --num_samples <num_samples>
 ```
 
 ## Evaluation
@@ -196,8 +199,8 @@ python eval_cad.py --fake <in_dir> \
 - Directional Clip Score ( Ensure you have run `cad_img.py` to render both the original and edited CAD sequences).
 
 ```python
-python eval_dclip.py --source_dir <source_dir> \
-                     --edit_dir <edit_dir> \
+python eval_dclip.py --source_dir <source_img_dir> \
+                     --edit_dir <edit_img_dir> \
                      --instruction_path <instruction_path> \
                      --out_path <out_path>
 ```
@@ -219,6 +222,7 @@ If you find our work useful, please cite the following paper:
   year={2025}
 }
 ```
+
 ## Acknowledgements
 
 We would like to thank and acknowledge referenced codes from [hnc-cad](https://github.com/samxuxiang/hnc-cad), [SkexGen](https://github.com/samxuxiang/SkexGen) and [StyleGAN-nada](https://github.com/rinongal/StyleGAN-nada).

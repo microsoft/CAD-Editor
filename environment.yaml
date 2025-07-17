@@ -1,0 +1,42 @@
+name: cad-editor
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - scipy=1.13.1
+  - opencv
+  - pythonocc-core=7.7.2
+  - pip
+
+  - pip:
+      - accelerate==0.28.0
+      - azure-identity==1.21.0
+      - git+https://github.com/openai/CLIP.git
+      - git+https://github.com/otaheri/chamfer_distance@dc9987dcf70888d387d96893ba1fb9ba9a333992
+      - datasets==2.18.0
+      - deepspeed==0.15.4
+      - diffusers==0.20.0
+      - gitdb==4.0.11
+      - gitpython==3.1.42
+      - huggingface-hub==0.30.0
+      - multiprocess==0.70.16
+      - ninja==1.11.1.1
+      - openai==1.59.7
+      - peft==0.9.0
+      - pillow==10.3.0
+      - plyfile==1.1
+      - pytz==2024.1
+      - requests==2.32.4
+      - safetensors==0.4.3
+      - torch=2.5.1
+      - torchvision=0.20.1
+      - torchaudio=2.5.1
+      - tensorboard==2.16.2
+      - tqdm==4.66.3
+      - transformers==4.52.1
+      - trimesh==4.6.0
+      - wandb==0.16.4

@@ -471,9 +471,19 @@ if __name__ == "__main__":
     parser.add_argument("--type", type=str, required=True)
     args = parser.parse_args()
 
-    with open(args.in_path, "r") as f:
-        data = json.load(f) 
-    
+    with open(args.in_path, 'r') as file: 
+        content = file.read().strip()
+        try:
+            data = json.loads(content)
+        except json.JSONDecodeError:
+            try:
+                data =[]
+                for line in content.split('\n'):
+                    line = line.strip()
+                    if line:
+                        data.append(json.loads(line))
+            except json.JSONDecodeError:
+                raise ValueError(f"Failed to parse JSON from {args.in_path}. Please check the file format.")
 
     num_valid_str = 0
     for idx, item in enumerate(data):

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 import json
 import pickle
 from pathlib import Path
-import pandas as pd
 import numpy as np
 import warnings
 import random
@@ -14,7 +13,7 @@ import torch
 import argparse
 import glob
 import os
-from diffusers.training_utils import cast_training_params
+# from diffusers.training_utils import cast_training_params
 
 
 IGNORE_INDEX = -100
@@ -147,12 +146,12 @@ def setup_datasets(args, llama_tokenizer, transform_args={}):
     
     datasets = {
         "train": CADDataset(
-            str(args.data_path / train_file),
+            str(args.data_folder / train_file),
             task_type=args.task_type,
             llama_tokenizer=llama_tokenizer,
         ),
         "val": CADDataset(
-            str(args.data_path / val_file),
+            str(args.data_folder / val_file),
             task_type=args.task_type,
             llama_tokenizer=llama_tokenizer,
         ),
@@ -324,7 +323,7 @@ if __name__ == "__main__":
     parser.add_argument("--lora_rank", type=int, default=32)
     parser.add_argument("--lora_alpha", type=int, default=32)
     parser.add_argument("--lora_dropout", type=float, default=0.05)
-    parser.add_argument("--data_path", type=Path, default="/data/dataset/")
+    parser.add_argument("--data_folder", type=Path, default="/data/dataset/")
     parser.add_argument("--num_epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--grad_accum", type=int, default=1)
