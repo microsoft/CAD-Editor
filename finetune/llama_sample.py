@@ -6,7 +6,6 @@ from peft import PeftModel
 from pathlib import Path
 import torch
 from transformers import LlamaForCausalLM, LlamaTokenizer, TrainingArguments
-import numpy as np
 
 
 DEFAULT_PAD_TOKEN = "[PAD]"
@@ -97,16 +96,6 @@ Masked CAD Operation Sequence:
 
 Based on the original CAD sequence, the editing instruction, and the masked sequence, generate the complete edited CAD sequence by replacing "<mask>" with the appropriate content:
 """
-    elif task_type == "recover":
-        return f"""Below is a Computer-Aided Design (CAD) operation sequence with masked parts. Your task is to recover the complete sequence based on the original sequence and editing instruction.
-Original CAD Operation Sequence:
-{item['original_sequence']}
-Editing Instruction:
-{instruction}
-Masked CAD Operation Sequence:
-{item['output_mask']}
-Complete CAD Operation Sequence:
-"""
     else:
         raise ValueError(f"Unknown task: {task_type}")
 
@@ -117,8 +106,6 @@ def get_output_field_name(task_type):
         return "output_mask"
     elif task_type == "infill":
         return "output_infill"
-    elif task_type == "recover":
-        return "output_recover"
     else:
         raise ValueError(f"Unknown task: {task_type}")
 
@@ -191,8 +178,8 @@ def conditional_sample(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task_type", type=str, required=True, choices=["mask", "infill", "recover"], 
-                       help="Task to perform: 'mask' for masking CAD sequences, 'infill' for infilling from masked sequences, 'recover' for recovering complete sequences")
+    parser.add_argument("--task_type", type=str, required=True, choices=["mask", "infill"], 
+                       help="Task to perform: 'mask' for masking CAD sequences, 'infill' for infilling from masked sequences")
     parser.add_argument("--model_path", type=str, required=True)
     parser.add_argument("--data_path", type=str, required=True)
     parser.add_argument("--num_samples", type=int, default=10)

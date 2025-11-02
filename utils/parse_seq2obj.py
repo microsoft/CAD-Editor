@@ -493,8 +493,8 @@ if __name__ == "__main__":
                 parsed_data = cad_parser.perform(item["original_sequence"])
             elif args.type == "edit":
                 parsed_data = cad_parser.perform(item["edited_sequence"])
-            elif args.type == "recover":
-                parsed_data = cad_parser.perform(item["output_recover"])
+            elif args.type == "infill":
+                parsed_data = cad_parser.perform(item["output_infill"])
             elif args.type == "gpt":
                 parsed_data = cad_parser.perform(item["output"])
             elif args.type == "direct":
