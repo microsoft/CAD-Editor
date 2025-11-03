@@ -173,7 +173,7 @@ CUDA_VISIBLE_DEVICES=<gpu_id> python llama_sample.py \
 # Step 1: Parse the generated string to CAD obj. The in_path should be set the same as the out_path in the inference.
 python  utils/parse_seq2obj.py --in_path <in_path> \
                                --out_path <out_path> \
-                               --type edit
+                               --type infill
 
 # Step 2: Convert generated CAD obj to stl format. Use timeout command to prevent occ hanging. The data_folder should be set the same as the out_path in Step 1.
 timeout 180 python utils/visual_obj.py --data_folder <data_folder>
